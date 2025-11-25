@@ -18,7 +18,6 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
             if (!company.image_reference_sentence) return;
             
             setIsLoadingImage(true);
-            // Pass the reference sentence from the CSV data directly to the service
             const url = await generateCompanyImage(company.image_reference_sentence);
             setImageUrl(url);
             setIsLoadingImage(false);
@@ -60,7 +59,7 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
                             {isLoadingImage ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50">
                                     <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                                    <p className="text-sm text-gray-500 font-medium">Reference Sentence 분석 중...</p>
+                                    <p className="text-sm text-gray-500 font-medium">활동 내역 기반 생성 중...</p>
                                 </div>
                             ) : imageUrl ? (
                                 <img 
@@ -74,8 +73,8 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
                                 </div>
                             )}
                         </div>
-                        <p className="mt-2 text-xs text-gray-400 italic truncate">
-                             Ref: {company.image_reference_sentence}
+                        <p className="mt-3 text-xs text-gray-400 italic border-l-2 border-gray-200 pl-3">
+                             Ref: {company.image_reference_sentence.substring(0, 100)}{company.image_reference_sentence.length > 100 ? '...' : ''}
                         </p>
                     </section>
 

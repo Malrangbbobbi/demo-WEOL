@@ -1,6 +1,5 @@
 
-// Fix: Import React types to resolve 'Cannot find namespace React' error.
-import type * as React from 'react';
+import React from 'react';
 
 export interface SDG {
   id: number;
@@ -41,12 +40,11 @@ export interface ModelOutput {
   recommended_companies: CompanyRecommendation[];
 }
 
-// Interface representing a row in your CSV
 export interface RawCompanyData {
     company_name: string;
     corp_code: string;
     Risk_Tag: string;
-    [key: string]: any; // To handle dynamic Gxx_mentions, Gxx_sent_mean, Gxx_reference_sentence
+    [key: string]: string | number | undefined;
 }
 
 export type AppStep = 'start' | 'sdg-select' | 'sdg-score' | 'investment' | 'loading' | 'dashboard' | 'detail';
