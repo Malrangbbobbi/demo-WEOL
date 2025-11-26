@@ -80,6 +80,9 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
     };
 
     const { main: snsMain, tags: snsTags } = formatSnsText(company.sns_promotion);
+    
+    // Toss Securities URL
+    const tossUrl = `https://www.tossinvest.com/stocks/A${company.corp_code}/order`;
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-100 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
@@ -102,13 +105,31 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     
                     <div className="relative z-10 flex flex-col gap-6 h-full">
-                        {/* 1. Header Section */}
+                        {/* 1. Header Section - Clickable for Toss Securities */}
                         <div className="shrink-0">
                             <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold tracking-wider uppercase mb-3 border border-blue-500/30">
                                 Investment Focus
                             </span>
-                            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-2">{company.corp_name}</h1>
-                            <p className="text-xl text-blue-400 font-mono">{company.corp_code}</p>
+                            <a 
+                                href={tossUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="group block hover:opacity-90 transition-opacity"
+                                title="토스증권에서 보기"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-2 group-hover:text-blue-300 transition-colors">
+                                        {company.corp_name}
+                                    </h1>
+                                    <svg className="w-6 h-6 text-gray-500 group-hover:text-blue-300 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </div>
+                                <p className="text-xl text-blue-400 font-mono flex items-center gap-2">
+                                    {company.corp_code}
+                                    <span className="text-xs px-2 py-0.5 rounded bg-blue-900 text-blue-200 border border-blue-700 opacity-0 group-hover:opacity-100 transition-opacity">토스증권 바로가기</span>
+                                </p>
+                            </a>
                         </div>
 
                         {/* 2. SDG Value Alignment (Moved here) */}
