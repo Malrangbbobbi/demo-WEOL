@@ -83,7 +83,7 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-100 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
             {/* Main Card Container - Ref added here for download functionality */}
-            <div ref={contentRef} className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[85vh] relative">
+            <div ref={contentRef} className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[90vh] relative">
                 
                 {/* Floating Close Button - Hide when downloading */}
                 <button 
@@ -96,12 +96,13 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
                 </button>
 
                 {/* Left Panel: Visuals & Header (Dark Theme) */}
-                <div className="lg:w-5/12 bg-slate-900 text-white p-8 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+                <div className="lg:w-5/12 bg-slate-900 text-white p-6 lg:p-8 flex flex-col relative overflow-y-auto lg:overflow-visible custom-scrollbar">
                     {/* Decorative Background Element */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     
-                    <div className="relative z-10">
-                        <div className="mb-8">
+                    <div className="relative z-10 flex flex-col gap-8 h-full">
+                        {/* 1. Header Section */}
+                        <div className="shrink-0">
                             <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold tracking-wider uppercase mb-3 border border-blue-500/30">
                                 Investment Focus
                             </span>
@@ -109,13 +110,28 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
                             <p className="text-xl text-blue-400 font-mono">{company.corp_code}</p>
                         </div>
 
-                        {/* SDG Visual Snapshot */}
-                        <div className="mt-auto">
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center">
+                        {/* 2. SDG Value Alignment (Moved here) */}
+                        <div className="flex-1 min-h-[250px] shrink-0">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                                SDG 가치 부합도
+                            </h2>
+                            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-2 h-64 shadow-inner">
+                                <RadarChartComponent 
+                                    companyAlignment={company.sdg_alignment} 
+                                    userSdgs={userSdgs}
+                                    darkMode={true}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 3. SDG Visual Snapshot */}
+                        <div className="shrink-0">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
                                 <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                                 SDG 비주얼 스냅샷
                             </h2>
-                            <div className="w-full aspect-square bg-slate-800 rounded-2xl overflow-hidden relative shadow-2xl border border-slate-700 group">
+                            <div className="w-full aspect-video sm:aspect-square bg-slate-800 rounded-2xl overflow-hidden relative shadow-2xl border border-slate-700 group">
                                 {isLoadingImage ? (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                                         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -166,20 +182,6 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
 
                     <div className="max-w-2xl mx-auto space-y-10">
                         
-                        {/* 0. SDG Value Alignment (Radar Chart) */}
-                        <section>
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                                SDG 가치 부합도
-                            </h2>
-                            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 h-72">
-                                <RadarChartComponent 
-                                    companyAlignment={company.sdg_alignment} 
-                                    userSdgs={userSdgs} 
-                                />
-                            </div>
-                        </section>
-
                         {/* 1. SDG Insights */}
                         <section>
                             <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center">
@@ -230,6 +232,9 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack
             <style>{`
                 @keyframes fade-in { 0% { opacity: 0; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
                 .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
             `}</style>
         </div>
     );
