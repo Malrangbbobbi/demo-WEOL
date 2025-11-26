@@ -239,9 +239,8 @@ export const generateCompanyImage = async (referenceSentence: string): Promise<s
 
     try {
         // Create a visual prompt based on the reference sentence
-        const imagePrompt = `A high-quality, futuristic, and cinematic 3D concept art visualizing this corporate activity: "${referenceSentence}". 
-        The image should be inspiring, clean, and professional. 
-        Style: Photorealistic, 8k resolution, soft lighting, sustainable technology theme. No text.`;
+        const imagePrompt = `A warm, cute, and friendly flat vector illustration visualizing this corporate activity: "${referenceSentence}". 
+        Style: minimal, pastel colors, soft shapes, engaging and approachable, suitable for a mobile app interface. No text.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image', // NANO BANANA
