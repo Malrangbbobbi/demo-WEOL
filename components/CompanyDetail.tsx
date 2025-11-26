@@ -1,7 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { CompanyRecommendation, SDG } from '../types';
 import { generateCompanyImage } from '../services/geminiService';
+import RadarChartComponent from './RadarChartComponent';
+import html2canvas from 'html2canvas';
 
 interface CompanyDetailProps {
     company: CompanyRecommendation;
@@ -9,9 +11,10 @@ interface CompanyDetailProps {
     onBack: () => void;
 }
 
-const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
+const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, userSdgs, onBack }) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isLoadingImage, setIsLoadingImage] = useState<boolean>(false);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchImage = async () => {
@@ -39,16 +42,54 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
         return { main: text, tags: '' };
     };
 
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `여울 - ${company.corp_name} 추천`,
+                    text: `나의 가치관에 맞는 기업, ${company.corp_name}을 확인해보세요! #여울 #ESG투자`,
+                    url: window.location.href,
+                });
+            } catch (error) {
+                console.log('Error sharing:', error);
+            }
+        } else {
+            alert("공유하기 기능이 지원되지 않는 브라우저입니다. URL을 복사해주세요.");
+        }
+    };
+
+    const handleDownload = async () => {
+        if (contentRef.current) {
+            try {
+                const canvas = await html2canvas(contentRef.current, {
+                    scale: 2, // High resolution
+                    useCORS: true, // Allow cross-origin images if configured
+                    backgroundColor: '#ffffff'
+                });
+                
+                const link = document.createElement('a');
+                link.download = `${company.corp_name}_ESG_Card.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error("Download failed:", error);
+                alert("이미지 저장에 실패했습니다.");
+            }
+        }
+    };
+
     const { main: snsMain, tags: snsTags } = formatSnsText(company.sns_promotion);
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-100 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
-            <div className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[85vh] relative">
+            {/* Main Card Container - Ref added here for download functionality */}
+            <div ref={contentRef} className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[85vh] relative">
                 
-                {/* Close Button (Floating) */}
+                {/* Floating Close Button - Hide when downloading */}
                 <button 
                     onClick={onBack} 
                     className="absolute top-6 right-6 z-50 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110"
+                    data-html2canvas-ignore="true"
                     aria-label="Close"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -104,8 +145,41 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onBack }) => {
 
                 {/* Right Panel: Detailed Text Content (Light Theme) */}
                 <div className="lg:w-7/12 bg-white p-8 lg:p-12 overflow-y-auto">
+                    
+                    {/* Actions Row - Hide on Download */}
+                    <div className="flex justify-end gap-3 mb-6" data-html2canvas-ignore="true">
+                        <button 
+                            onClick={handleShare}
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                            공유하기
+                        </button>
+                        <button 
+                            onClick={handleDownload}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            카드 다운로드
+                        </button>
+                    </div>
+
                     <div className="max-w-2xl mx-auto space-y-10">
                         
+                        {/* 0. SDG Value Alignment (Radar Chart) */}
+                        <section>
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                                SDG 가치 부합도
+                            </h2>
+                            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 h-72">
+                                <RadarChartComponent 
+                                    companyAlignment={company.sdg_alignment} 
+                                    userSdgs={userSdgs} 
+                                />
+                            </div>
+                        </section>
+
                         {/* 1. SDG Insights */}
                         <section>
                             <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center">

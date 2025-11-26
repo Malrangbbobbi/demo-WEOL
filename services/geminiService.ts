@@ -119,6 +119,25 @@ const calculateScore = (company: RawCompanyData, userSdgScores: SdgScore[], risk
     return totalScore * riskMultiplier;
 };
 
+/**
+ * Calculates alignment scores for all 17 SDGs for the radar chart
+ */
+const calculateAllSdgAlignments = (company: RawCompanyData): number[] => {
+    const alignments: number[] = [];
+    for (let i = 1; i <= 17; i++) {
+        const code = getGCode(i);
+        const mentions = (company[`${code}_mentions_per_1k_tokens`] as number) || 0;
+        const sentiment = (company[`${code}_sent_mean`] as number) || 0;
+        
+        // Calculate raw score: mentions * sentiment
+        // Cap at 5 for the chart
+        // Multiplier 1.5 helps fill the chart for companies with decent activity
+        const score = Math.min(5, mentions * sentiment * 1.5);
+        alignments.push(score);
+    }
+    return alignments;
+};
+
 export const getCompanyRecommendations = async (
     sdgScores: SdgScore[],
     riskPreference: RiskPreference
@@ -149,7 +168,10 @@ export const getCompanyRecommendations = async (
             }
         });
 
-        return { ...company, score, topSdgId };
+        // Calculate all alignments for the chart
+        const sdg_alignment = calculateAllSdgAlignments(company);
+
+        return { ...company, score, topSdgId, sdg_alignment };
     }).sort((a, b) => b.score - a.score);
 
     // 3. Select Top 3
@@ -227,7 +249,7 @@ export const getCompanyRecommendations = async (
             investment_report: generatedContent.investment_report,
             sns_promotion: generatedContent.sns_promotion,
             image_reference_sentence: cleanReference,
-            sdg_alignment: [] // Not strictly needed for the detail view request, can be empty or computed
+            sdg_alignment: company.sdg_alignment // Pass the calculated alignments
         });
     }
 
